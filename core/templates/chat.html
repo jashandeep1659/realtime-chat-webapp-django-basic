@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <h1>Chat karlo guys!</h1>
+        <input type="text" value="Hello! guys chat karlo" id="message" />
+        <button id="confirm">send message</button>
+
+        <div id="messages"></div>
+        <script>
+            let con = false;
+            const ws = new WebSocket("ws://127.0.0.1:8000/ws/chat/");
+            ws.addEventListener("open", () => {
+                con = true;
+                console.log("connected");
+                ws.send(
+                    JSON.stringify({ command: "join", groupname: "public" })
+                );
+            });
+
+            const confirm = document.getElementById("confirm");
+            confirm.addEventListener("click", () => {
+                if (con) {
+                    const message = document.getElementById("message").value;
+                    ws.send(
+                        JSON.stringify({
+                            command: "send",
+                            groupname: "public",
+                            message: message,
+                        })
+                    );
+                    console.log(message);
+                } else {
+                    console.log("not workign");
+                }
+            });
+
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                if (data.message) {
+                    console.log(data.message);
+                    let messages = document.getElementById("messages");
+                    messages.innerHTML += `<p>${data.message}</p>`;
+                }
+            };
+        </script>
+    </body>
+</html>
